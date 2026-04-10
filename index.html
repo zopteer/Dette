@@ -2,379 +2,350 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mes Dettes">
 <title>Mes Dettes</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-body {
+:root {
+  --bg: #0F0E0D;
+  --bg2: #181714;
+  --bg3: #211F1C;
+  --surface: #2A2723;
+  --ink: #F5F0E8;
+  --ink2: #A09A90;
+  --ink3: #5A5550;
+  --accent: #E8A040;
+  --green: #4CAF82;
+  --red: #E05555;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
   font-family: 'Instrument Sans', sans-serif;
-  background: #0F0E0D;
-  color: #F5F0E8;
-  min-height: 100vh;
-}
-
-/* ===== APP SHELL ===== */
-#app {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
   overflow: hidden;
 }
 
-/* ===== SIDEBAR ===== */
-#sidebar {
-  width: 280px;
-  min-width: 280px;
-  background: #181714;
-  border-right: 1px solid rgba(255,255,255,0.07);
-  display: flex;
+/* ===== SCREENS ===== */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: none;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
+  background: var(--bg);
 }
+.screen.active { display: flex; }
 
-.sb-top {
-  padding: 20px 16px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+/* ===== TOP BAR ===== */
+.topbar {
+  padding: calc(var(--safe-top) + 14px) 20px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   flex-shrink: 0;
 }
-
-.logo {
+.topbar-title {
   font-family: 'Syne', sans-serif;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
-  margin-bottom: 14px;
 }
-.logo span { color: #E8A040; }
+.topbar-title span { color: var(--accent); }
 
-.total-box {
+.icon-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+
+/* ===== SCROLL AREA ===== */
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--safe-bot) + 80px);
+}
+
+/* ===== HOME SCREEN ===== */
+.home-banner {
+  margin: 16px;
   background: rgba(232,160,64,0.1);
   border: 1px solid rgba(232,160,64,0.2);
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 12px;
+  border-radius: 16px;
+  padding: 18px 20px;
 }
-.total-lbl { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #E8A040; margin-bottom: 4px; }
-.total-val { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; }
-.total-sub { font-size: 11px; color: #7A7570; margin-top: 3px; }
+.home-banner-lbl { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+.home-banner-val { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 700; color: var(--ink); }
+.home-banner-sub { font-size: 12px; color: var(--ink2); margin-top: 4px; }
 
-.btn-new {
-  width: 100%;
-  background: #E8A040;
-  color: #0F0E0D;
-  border: none;
-  border-radius: 8px;
-  padding: 10px;
-  font-family: 'Syne', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .2s;
+.section-title {
+  font-size: 11px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink3);
+  padding: 0 16px 8px;
 }
-.btn-new:hover { background: #C87820; }
 
-.sb-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-}
-.sb-list::-webkit-scrollbar { width: 3px; }
-.sb-list::-webkit-scrollbar-thumb { background: #2A2723; border-radius: 2px; }
-
-.sb-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 10px;
-  border-radius: 8px;
+.person-card {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg2);
+  border-radius: 14px;
+  margin: 0 16px 8px;
+  padding: 14px 16px;
   cursor: pointer;
   transition: background .15s;
-  margin-bottom: 2px;
+  border: 1px solid rgba(255,255,255,0.05);
 }
-.sb-item:hover { background: #211F1C; }
-.sb-item.active { background: #2A2723; }
+.person-card:active { background: var(--bg3); }
 
 .av {
-  width: 34px; height: 34px;
-  border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-size: 12px; font-weight: 700;
+  font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
   flex-shrink: 0;
 }
 
-.sb-name { font-size: 13px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sb-bal { font-size: 11px; }
-.sb-bal.owed { color: #E8A040; }
-.sb-bal.clear { color: #4CAF82; }
-.sb-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.sb-dot.owed { background: #E8A040; }
-.sb-dot.clear { background: #4CAF82; }
+.pc-info { flex: 1; overflow: hidden; }
+.pc-name { font-size: 15px; font-weight: 500; color: var(--ink); }
+.pc-bal { font-size: 12px; margin-top: 2px; }
+.pc-bal.owed { color: var(--accent); }
+.pc-bal.clear { color: var(--green); }
 
-/* ===== MAIN PANEL ===== */
-#main {
-  flex: 1;
-  overflow-y: auto;
-  background: #0F0E0D;
+.pc-right { text-align: right; flex-shrink: 0; }
+.pc-amt { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--accent); }
+.pc-amt.clear { color: var(--green); font-size: 13px; }
+.chevron { color: var(--ink3); font-size: 16px; margin-left: 6px; }
+
+.empty-state {
+  text-align: center; padding: 60px 32px;
+  color: var(--ink3);
 }
+.empty-ico { font-size: 52px; display: block; margin-bottom: 16px; }
+.empty-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--ink2); margin-bottom: 8px; }
+.empty-sub { font-size: 13px; line-height: 1.5; }
 
-/* EMPTY */
-#empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 100vh;
-  color: #3A3530;
-  text-align: center;
-  padding: 2rem;
-}
-#empty .e-ico { font-size: 52px; margin-bottom: 16px; }
-#empty .e-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: #5A5550; margin-bottom: 8px; }
-#empty .e-sub { font-size: 13px; color: #3A3530; }
-
-/* DETAIL */
-#detail { display: none; }
-
-.d-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 24px 28px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  position: sticky;
-  top: 0;
-  background: #0F0E0D;
-  z-index: 10;
-}
-
-.d-av {
-  width: 50px; height: 50px;
+/* FAB */
+.fab {
+  position: fixed;
+  bottom: calc(var(--safe-bot) + 20px);
+  right: 20px;
+  width: 58px; height: 58px;
   border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-size: 28px;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-size: 17px; font-weight: 700;
-  flex-shrink: 0;
-}
-
-.d-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
-.d-since { font-size: 11px; color: #5A5550; margin-top: 2px; }
-.d-del {
-  margin-left: auto;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 7px;
-  padding: 7px 13px;
-  font-size: 12px;
-  color: #7A7570;
   cursor: pointer;
-  transition: all .15s;
+  box-shadow: 0 4px 20px rgba(232,160,64,0.4);
+  transition: transform .15s;
+  z-index: 50;
 }
-.d-del:hover { background: rgba(224,85,85,0.12); color: #E05555; border-color: #E05555; }
+.fab:active { transform: scale(0.93); }
 
-/* STATS */
-.d-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+/* ===== DETAIL SCREEN ===== */
+.detail-hero {
+  padding: 20px 20px 16px;
+  display: flex; align-items: center; gap: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
 }
-.d-stat {
-  padding: 18px 28px;
-  border-right: 1px solid rgba(255,255,255,0.07);
+.detail-av {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700;
 }
-.d-stat:last-child { border-right: none; }
-.d-stat-lbl { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #5A5550; margin-bottom: 6px; }
-.d-stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; }
-.d-stat-val.lent { color: #F5F0E8; }
-.d-stat-val.repaid { color: #4CAF82; }
-.d-stat-val.remaining { color: #E8A040; }
+.detail-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+.detail-since { font-size: 11px; color: var(--ink3); margin-top: 2px; }
 
-/* PROGRESS */
-.d-progress {
-  padding: 16px 28px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+.stats-grid {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 1px; background: rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
 }
-.d-prog-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
-.d-prog-lbl { font-size: 11px; color: #5A5550; }
-.d-prog-pct { font-size: 11px; font-weight: 600; color: #4CAF82; }
-.d-prog-bar { height: 5px; background: #2A2723; border-radius: 100px; overflow: hidden; }
-.d-prog-fill { height: 100%; background: linear-gradient(90deg, #4CAF82, #7AE0A8); border-radius: 100px; transition: width .5s; }
+.stat { background: var(--bg); padding: 14px 12px; text-align: center; }
+.stat-lbl { font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); margin-bottom: 5px; }
+.stat-val { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+.stat-val.lent { color: var(--ink); }
+.stat-val.repaid { color: var(--green); }
+.stat-val.rem { color: var(--accent); }
 
-/* BODY */
-.d-body { padding: 20px 28px 40px; }
+.prog-wrap { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+.prog-top { display: flex; justify-content: space-between; margin-bottom: 7px; }
+.prog-lbl { font-size: 11px; color: var(--ink3); }
+.prog-pct { font-size: 11px; font-weight: 600; color: var(--green); }
+.prog-bar { height: 6px; background: var(--surface); border-radius: 100px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg,#4CAF82,#7AE0A8); border-radius: 100px; transition: width .5s; }
 
 /* ACTION BUTTONS */
-.d-actions { display: flex; gap: 10px; margin-bottom: 24px; }
+.action-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
 .btn-lend {
-  display: flex; align-items: center; gap: 8px;
   background: rgba(232,160,64,0.12);
   border: 1px solid rgba(232,160,64,0.25);
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-family: 'Syne', sans-serif;
-  font-size: 13px; font-weight: 600;
-  color: #E8A040;
-  cursor: pointer;
+  border-radius: 12px; padding: 13px 10px;
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--accent); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   transition: all .2s;
 }
-.btn-lend:hover { background: #E8A040; color: #0F0E0D; }
-
+.btn-lend:active { background: var(--accent); color: var(--bg); }
 .btn-repay {
-  display: flex; align-items: center; gap: 8px;
   background: rgba(76,175,130,0.1);
   border: 1px solid rgba(76,175,130,0.25);
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-family: 'Syne', sans-serif;
-  font-size: 13px; font-weight: 600;
-  color: #4CAF82;
-  cursor: pointer;
+  border-radius: 12px; padding: 13px 10px;
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--green); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   transition: all .2s;
 }
-.btn-repay:hover { background: #4CAF82; color: #0F0E0D; }
+.btn-repay:active { background: var(--green); color: var(--bg); }
 
-/* CLEARED */
-.cleared {
-  background: rgba(76,175,130,0.1);
-  border: 1px solid rgba(76,175,130,0.2);
-  border-radius: 10px;
-  padding: 14px 18px;
-  display: flex; align-items: center; gap: 10px;
-  font-size: 14px; font-weight: 500; color: #4CAF82;
-  margin-bottom: 20px;
-}
+/* TX LIST */
+.tx-section { padding: 16px 16px 0; }
+.tx-sec-title { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); margin-bottom: 10px; }
 
-/* SECTION */
-.d-section { margin-bottom: 24px; }
-.d-sec-title {
-  font-size: 10px; font-weight: 600; letter-spacing: .1em;
-  text-transform: uppercase; color: #5A5550;
-  margin-bottom: 10px;
-}
-
-/* TX */
 .tx {
   display: flex; align-items: center; gap: 12px;
-  background: #181714;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 6px;
-  transition: background .15s;
+  background: var(--bg2); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
 }
-.tx:hover { background: #1E1C19; }
-
 .tx-ico {
-  width: 32px; height: 32px;
-  border-radius: 50%;
+  width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; flex-shrink: 0;
+  font-size: 16px; flex-shrink: 0;
 }
 .tx-ico.lend { background: rgba(232,160,64,0.12); }
 .tx-ico.repay { background: rgba(76,175,130,0.12); }
-
-.tx-info { flex: 1; }
-.tx-note { font-size: 13px; color: #F5F0E8; }
-.tx-date { font-size: 11px; color: #5A5550; margin-top: 2px; }
-
+.tx-info { flex: 1; overflow: hidden; }
+.tx-note { font-size: 14px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tx-date { font-size: 11px; color: var(--ink3); margin-top: 2px; }
 .tx-amt { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; white-space: nowrap; }
-.tx-amt.lend { color: #E8A040; }
+.tx-amt.lend { color: var(--accent); }
 .tx-amt.lend::before { content: '+ '; }
-.tx-amt.repay { color: #4CAF82; }
+.tx-amt.repay { color: var(--green); }
 .tx-amt.repay::before { content: '− '; }
-
 .tx-del {
-  background: transparent; border: none;
-  color: #3A3530; font-size: 13px; cursor: pointer;
-  padding: 4px 6px; border-radius: 5px;
-  transition: all .15s;
+  background: transparent; border: none; color: var(--ink3);
+  font-size: 16px; cursor: pointer; padding: 4px 8px;
+  border-radius: 6px; flex-shrink: 0;
 }
-.tx-del:hover { color: #E05555; background: rgba(224,85,85,0.12); }
+.tx-del:active { color: var(--red); background: rgba(224,85,85,0.12); }
 
-.no-tx { font-size: 12px; color: #3A3530; padding: 8px 0; }
+.no-tx { font-size: 13px; color: var(--ink3); padding: 8px 0 16px; }
 
-/* ===== MODALS ===== */
-.overlay {
+.cleared {
+  margin: 0 16px 8px;
+  background: rgba(76,175,130,0.1); border: 1px solid rgba(76,175,130,0.2);
+  border-radius: 12px; padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 500; color: var(--green);
+}
+
+.del-person-btn {
+  margin: 20px 16px 0;
+  width: calc(100% - 32px);
+  background: rgba(224,85,85,0.08);
+  border: 1px solid rgba(224,85,85,0.2);
+  border-radius: 12px; padding: 13px;
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--red); cursor: pointer;
+}
+.del-person-btn:active { background: rgba(224,85,85,0.2); }
+
+/* ===== BOTTOM SHEET ===== */
+.sheet-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 999;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
   display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
+  align-items: flex-end;
   backdrop-filter: blur(4px);
 }
-.overlay.open { display: flex; }
+.sheet-overlay.open { display: flex; }
 
-.modal {
-  background: #1E1C19;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px;
-  padding: 24px;
+.sheet {
+  background: var(--bg2);
+  border-radius: 22px 22px 0 0;
+  padding: 0 20px calc(var(--safe-bot) + 20px);
   width: 100%;
-  max-width: 400px;
+  animation: slideUp .25s cubic-bezier(0.34,1.2,0.64,1);
 }
-.modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--surface); border-radius: 100px;
+  margin: 12px auto 20px;
+}
+.sheet-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 20px; }
 
 .field { margin-bottom: 14px; }
-.field label { display: block; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #5A5550; margin-bottom: 6px; }
+.field label { display: block; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); margin-bottom: 7px; }
 .field input, .field textarea {
   width: 100%;
-  background: #0F0E0D;
+  background: var(--bg3);
   border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  padding: 10px 13px;
+  border-radius: 10px;
+  padding: 13px 14px;
   font-family: 'Instrument Sans', sans-serif;
-  font-size: 14px;
-  color: #F5F0E8;
-  outline: none;
+  font-size: 16px; /* 16px empêche le zoom sur iOS */
+  color: var(--ink); outline: none;
 }
-.field input:focus, .field textarea:focus {
-  border-color: #E8A040;
-  box-shadow: 0 0 0 3px rgba(232,160,64,0.12);
-}
-.field textarea { resize: vertical; min-height: 65px; }
+.field input:focus, .field textarea:focus { border-color: var(--accent); }
+.field textarea { resize: none; height: 80px; }
 
-.m-actions { display: flex; gap: 10px; margin-top: 18px; }
-.m-cancel {
-  background: transparent; border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 100px; padding: 11px 20px;
-  font-size: 13px; color: #7A7570; cursor: pointer;
+.sheet-actions { display: flex; gap: 10px; margin-top: 18px; }
+.s-cancel {
+  background: transparent; border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 100px; padding: 14px 20px;
+  font-size: 14px; color: var(--ink2); cursor: pointer;
 }
-.m-cancel:hover { background: #2A2723; }
-.m-save {
-  flex: 1; border: none; border-radius: 100px; padding: 11px;
-  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer;
-  transition: filter .2s;
+.s-save {
+  flex: 1; border: none; border-radius: 100px; padding: 14px;
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer;
 }
-.m-save:hover { filter: brightness(.9); }
-.m-save.gold { background: #E8A040; color: #0F0E0D; }
-.m-save.green { background: #4CAF82; color: #0F0E0D; }
+.s-save.gold { background: var(--accent); color: var(--bg); }
+.s-save.green { background: var(--green); color: var(--bg); }
 
-/* Confirm */
-.confirm-box {
-  background: #1E1C19;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px;
-  padding: 28px 24px;
-  width: 100%; max-width: 320px;
+/* Confirm sheet */
+.confirm-sheet {
+  background: var(--bg2); border-radius: 22px 22px 0 0;
+  padding: 0 20px calc(var(--safe-bot) + 24px);
+  width: 100%;
+  animation: slideUp .25s cubic-bezier(0.34,1.2,0.64,1);
   text-align: center;
 }
-.confirm-ico { font-size: 36px; display: block; margin-bottom: 12px; }
-.confirm-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 8px; }
-.confirm-sub { font-size: 13px; color: #7A7570; margin-bottom: 20px; }
-.confirm-acts { display: flex; gap: 10px; }
-.m-del { flex: 1; background: #E05555; color: #fff; border: none; border-radius: 100px; padding: 11px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+.conf-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.conf-sub { font-size: 14px; color: var(--ink2); margin-bottom: 20px; }
+.conf-acts { display: flex; gap: 10px; }
+.s-del { flex:1; background: var(--red); color: #fff; border: none; border-radius: 100px; padding: 14px; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; }
 
 /* Toast */
 #toast {
-  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(10px);
-  background: #2A2723; border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 100px; padding: 9px 18px;
-  font-size: 13px; color: #F5F0E8;
+  position: fixed; bottom: calc(var(--safe-bot) + 90px); left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--surface); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px; padding: 10px 20px;
+  font-size: 13px; color: var(--ink);
   opacity: 0; transition: all .3s; z-index: 9999; white-space: nowrap;
   pointer-events: none;
 }
@@ -383,147 +354,127 @@ body {
 </head>
 <body>
 
-<div id="app">
-
-  <!-- SIDEBAR -->
-  <div id="sidebar">
-    <div class="sb-top">
-      <div class="logo">mes <span>dettes</span></div>
-      <div class="total-box">
-        <div class="total-lbl">Total restant dû</div>
-        <div class="total-val" id="grand-total">0,00 €</div>
-        <div class="total-sub" id="grand-sub">0 personne active</div>
-      </div>
-      <button class="btn-new" onclick="openAddPerson()">+ Nouvelle personne</button>
+<!-- ===== SCREEN: HOME ===== -->
+<div class="screen active" id="screen-home">
+  <div class="topbar">
+    <div class="topbar-title">mes <span>dettes</span></div>
+  </div>
+  <div class="scroll" id="home-scroll">
+    <div class="home-banner">
+      <div class="home-banner-lbl">Total restant dû</div>
+      <div class="home-banner-val" id="grand-total">0,00 €</div>
+      <div class="home-banner-sub" id="grand-sub">0 personne active</div>
     </div>
-    <div class="sb-list" id="sb-list">
-      <div style="text-align:center;padding:2rem 1rem;font-size:12px;color:#3A3530;">Aucune personne</div>
+    <div class="section-title" id="sec-title" style="display:none">Personnes</div>
+    <div id="people-list"></div>
+  </div>
+  <button class="fab" onclick="openAddPerson()">+</button>
+</div>
+
+<!-- ===== SCREEN: DETAIL ===== -->
+<div class="screen" id="screen-detail">
+  <div class="topbar">
+    <button class="icon-btn" onclick="goHome()">←</button>
+    <div class="topbar-title" id="d-topbar-name"></div>
+    <div style="width:38px"></div>
+  </div>
+
+  <div style="flex-shrink:0">
+    <div class="detail-hero">
+      <div class="detail-av" id="d-av"></div>
+      <div>
+        <div class="detail-name" id="d-name"></div>
+        <div class="detail-since" id="d-since"></div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-lbl">Prêté</div><div class="stat-val lent" id="s-lent">0 €</div></div>
+      <div class="stat"><div class="stat-lbl">Remboursé</div><div class="stat-val repaid" id="s-repaid">0 €</div></div>
+      <div class="stat"><div class="stat-lbl">Restant</div><div class="stat-val rem" id="s-rem">0 €</div></div>
+    </div>
+
+    <div class="prog-wrap" id="prog-wrap" style="display:none">
+      <div class="prog-top">
+        <span class="prog-lbl">Remboursement</span>
+        <span class="prog-pct" id="prog-pct">0%</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-lend" onclick="openLend()">💸 Prêt</button>
+      <button class="btn-repay" onclick="openRepay()">💰 Remboursement</button>
     </div>
   </div>
 
-  <!-- MAIN -->
-  <div id="main">
-
-    <!-- EMPTY STATE -->
-    <div id="empty">
-      <div class="e-ico">💸</div>
-      <div class="e-title">Aucune personne sélectionnée</div>
-      <div class="e-sub">Crée une personne dans la barre de gauche<br>pour commencer à suivre ses remboursements.</div>
+  <div class="scroll" id="detail-scroll">
+    <div id="cleared-banner" style="display:none" class="cleared"><span style="font-size:18px">🎉</span> Tout est remboursé !</div>
+    <div class="tx-section">
+      <div class="tx-sec-title">Prêts</div>
+      <div id="list-lend"></div>
     </div>
-
-    <!-- DETAIL -->
-    <div id="detail">
-      <div class="d-header">
-        <div class="d-av" id="d-av"></div>
-        <div>
-          <div class="d-name" id="d-name"></div>
-          <div class="d-since" id="d-since"></div>
-        </div>
-        <button class="d-del" onclick="askDelPerson()">Supprimer</button>
-      </div>
-
-      <div class="d-stats">
-        <div class="d-stat">
-          <div class="d-stat-lbl">Total prêté</div>
-          <div class="d-stat-val lent" id="s-lent">0,00 €</div>
-        </div>
-        <div class="d-stat">
-          <div class="d-stat-lbl">Remboursé</div>
-          <div class="d-stat-val repaid" id="s-repaid">0,00 €</div>
-        </div>
-        <div class="d-stat">
-          <div class="d-stat-lbl">Restant dû</div>
-          <div class="d-stat-val remaining" id="s-remaining">0,00 €</div>
-        </div>
-      </div>
-
-      <div class="d-progress" id="d-progress" style="display:none">
-        <div class="d-prog-top">
-          <span class="d-prog-lbl">Progression du remboursement</span>
-          <span class="d-prog-pct" id="prog-pct">0%</span>
-        </div>
-        <div class="d-prog-bar"><div class="d-prog-fill" id="prog-fill" style="width:0%"></div></div>
-      </div>
-
-      <div class="d-body">
-        <div id="cleared-banner" style="display:none" class="cleared">
-          <span style="font-size:20px">🎉</span> Tout est remboursé !
-        </div>
-
-        <div class="d-actions">
-          <button class="btn-lend" onclick="openLend()">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Ajouter un prêt
-          </button>
-          <button class="btn-repay" onclick="openRepay()">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Remboursement reçu
-          </button>
-        </div>
-
-        <div class="d-section">
-          <div class="d-sec-title">Prêts</div>
-          <div id="list-lend"></div>
-        </div>
-        <div class="d-section">
-          <div class="d-sec-title">Remboursements</div>
-          <div id="list-repay"></div>
-        </div>
-      </div>
+    <div class="tx-section">
+      <div class="tx-sec-title">Remboursements</div>
+      <div id="list-repay"></div>
     </div>
-
+    <button class="del-person-btn" onclick="askDelPerson()">Supprimer cette personne</button>
   </div>
 </div>
 
-<!-- MODAL: Nouvelle personne -->
-<div class="overlay" id="ov-person">
-  <div class="modal">
-    <div class="modal-title">Nouvelle personne</div>
-    <div class="field"><label>Prénom / Nom *</label><input id="f-pname" type="text" placeholder="Ex: Thomas Dupont"></div>
-    <div class="m-actions">
-      <button class="m-cancel" onclick="closeOv('ov-person')">Annuler</button>
-      <button class="m-save gold" onclick="savePerson()">Créer</button>
+<!-- SHEET: Nouvelle personne -->
+<div class="sheet-overlay" id="sh-person">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Nouvelle personne</div>
+    <div class="field"><label>Prénom / Nom *</label><input id="f-pname" type="text" placeholder="Ex: Thomas"></div>
+    <div class="sheet-actions">
+      <button class="s-cancel" onclick="closeSheet('sh-person')">Annuler</button>
+      <button class="s-save gold" onclick="savePerson()">Créer</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Prêt -->
-<div class="overlay" id="ov-lend">
-  <div class="modal">
-    <div class="modal-title">Ajouter un prêt</div>
-    <div class="field"><label>Montant (€) *</label><input id="f-lamount" type="number" placeholder="50" min="0.01" step="0.01"></div>
+<!-- SHEET: Prêt -->
+<div class="sheet-overlay" id="sh-lend">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Ajouter un prêt</div>
+    <div class="field"><label>Montant (€) *</label><input id="f-lamt" type="number" inputmode="decimal" placeholder="50"></div>
     <div class="field"><label>Date</label><input id="f-ldate" type="date"></div>
-    <div class="field"><label>Description (optionnel)</label><textarea id="f-lnote" placeholder="Dîner, billet, avance…"></textarea></div>
-    <div class="m-actions">
-      <button class="m-cancel" onclick="closeOv('ov-lend')">Annuler</button>
-      <button class="m-save gold" onclick="saveLend()">Enregistrer</button>
+    <div class="field"><label>Description</label><textarea id="f-lnote" placeholder="Dîner, billet, avance…"></textarea></div>
+    <div class="sheet-actions">
+      <button class="s-cancel" onclick="closeSheet('sh-lend')">Annuler</button>
+      <button class="s-save gold" onclick="saveLend()">Enregistrer</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Remboursement -->
-<div class="overlay" id="ov-repay">
-  <div class="modal">
-    <div class="modal-title">Remboursement reçu</div>
-    <div class="field"><label>Montant (€) *</label><input id="f-ramount" type="number" placeholder="20" min="0.01" step="0.01"></div>
+<!-- SHEET: Remboursement -->
+<div class="sheet-overlay" id="sh-repay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Remboursement reçu</div>
+    <div class="field"><label>Montant (€) *</label><input id="f-ramt" type="number" inputmode="decimal" placeholder="20"></div>
     <div class="field"><label>Date</label><input id="f-rdate" type="date"></div>
-    <div class="field"><label>Description (optionnel)</label><textarea id="f-rnote" placeholder="Virement, liquide…"></textarea></div>
-    <div class="m-actions">
-      <button class="m-cancel" onclick="closeOv('ov-repay')">Annuler</button>
-      <button class="m-save green" onclick="saveRepay()">Enregistrer</button>
+    <div class="field"><label>Description</label><textarea id="f-rnote" placeholder="Virement, liquide…"></textarea></div>
+    <div class="sheet-actions">
+      <button class="s-cancel" onclick="closeSheet('sh-repay')">Annuler</button>
+      <button class="s-save green" onclick="saveRepay()">Enregistrer</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Confirmer suppression -->
-<div class="overlay" id="ov-confirm">
-  <div class="confirm-box">
-    <span class="confirm-ico" id="conf-ico">⚠️</span>
-    <div class="confirm-title" id="conf-title">Confirmer ?</div>
-    <div class="confirm-sub" id="conf-sub"></div>
-    <div class="confirm-acts">
-      <button class="m-cancel" onclick="closeOv('ov-confirm')">Annuler</button>
-      <button class="m-del" onclick="doConfirm()">Supprimer</button>
+<!-- SHEET: Confirmer -->
+<div class="sheet-overlay" id="sh-confirm">
+  <div class="confirm-sheet">
+    <div class="sheet-handle"></div>
+    <div style="font-size:36px;margin-bottom:12px" id="conf-ico">⚠️</div>
+    <div class="conf-title" id="conf-title">Confirmer ?</div>
+    <div class="conf-sub" id="conf-sub"></div>
+    <div class="conf-acts">
+      <button class="s-cancel" onclick="closeSheet('sh-confirm')">Annuler</button>
+      <button class="s-del" onclick="doConfirm()">Supprimer</button>
     </div>
   </div>
 </div>
@@ -531,12 +482,11 @@ body {
 <div id="toast"></div>
 
 <script>
-// ============ DATA ============
-let db = JSON.parse(localStorage.getItem('md3') || '{"people":[]}');
-let cur = null; // current person id
+let db = JSON.parse(localStorage.getItem('md4') || '{"people":[]}');
+let cur = null;
 let pendingAction = null;
 
-const save = () => localStorage.setItem('md3', JSON.stringify(db));
+const save = () => localStorage.setItem('md4', JSON.stringify(db));
 const today = () => new Date().toISOString().slice(0,10);
 const inits = n => n.trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
 const fmt = n => n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
@@ -544,7 +494,8 @@ const fmtD = d => { if(!d) return ''; const [y,m,j]=d.split('-'); return `${j}/$
 
 const PALS = [
   ['#3A2E1A','#E8A040'],['#1A2E2A','#4CAF82'],['#2E1A2E','#C87AD0'],
-  ['#1A1E2E','#6A8AE0'],['#2A1A1A','#E07040'],['#1A2A2E','#40C8C0']
+  ['#1A1E2E','#6A8AE0'],['#2A1A1A','#E07040'],['#1A2A2E','#40C8C0'],
+  ['#2E2218','#D4A060'],['#182E20','#60C890']
 ];
 const pal = name => { let h=0; for(let c of name) h=(h*31+c.charCodeAt(0))&0xffff; return PALS[h%PALS.length]; };
 
@@ -554,205 +505,217 @@ const bal = p => {
   return { lent, repaid, rem: Math.max(0, lent-repaid) };
 };
 
-// ============ TOAST ============
+// TOAST
 const toast = msg => {
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'), 2500);
 };
 
-// ============ OVERLAYS ============
-const closeOv = id => document.getElementById(id).classList.remove('open');
-document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
+// SHEETS
+const closeSheet = id => document.getElementById(id).classList.remove('open');
+document.querySelectorAll('.sheet-overlay').forEach(o =>
+  o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); })
+);
 
-// ============ ADD PERSON ============
+// SCREENS
+function goHome() {
+  document.getElementById('screen-detail').classList.remove('active');
+  document.getElementById('screen-home').classList.add('active');
+  renderHome();
+}
+
+function goDetail(id) {
+  cur = id;
+  document.getElementById('screen-home').classList.remove('active');
+  document.getElementById('screen-detail').classList.add('active');
+  document.getElementById('detail-scroll').scrollTop = 0;
+  renderDetail();
+}
+
+// ADD PERSON
 function openAddPerson() {
   document.getElementById('f-pname').value = '';
-  document.getElementById('ov-person').classList.add('open');
-  setTimeout(()=>document.getElementById('f-pname').focus(),80);
+  document.getElementById('sh-person').classList.add('open');
+  setTimeout(()=>document.getElementById('f-pname').focus(), 300);
 }
+
 function savePerson() {
   const name = document.getElementById('f-pname').value.trim();
   if (!name) return;
   const p = { id: Date.now(), name, created: today(), tx: [] };
   db.people.push(p);
-  save();
-  closeOv('ov-person');
-  renderSidebar();
-  selectPerson(p.id);
+  save(); closeSheet('sh-person');
   toast(name + ' ajouté·e !');
+  goDetail(p.id);
 }
 
-// ============ ADD LEND ============
+// LEND
 function openLend() {
-  document.getElementById('f-lamount').value = '';
+  document.getElementById('f-lamt').value = '';
   document.getElementById('f-ldate').value = today();
   document.getElementById('f-lnote').value = '';
-  document.getElementById('ov-lend').classList.add('open');
-  setTimeout(()=>document.getElementById('f-lamount').focus(),80);
+  document.getElementById('sh-lend').classList.add('open');
+  setTimeout(()=>document.getElementById('f-lamt').focus(), 300);
 }
 function saveLend() {
-  const amt = parseFloat(document.getElementById('f-lamount').value);
+  const amt = parseFloat(document.getElementById('f-lamt').value);
   if (!amt || amt<=0) return;
-  const p = db.people.find(x=>x.id===cur);
-  p.tx.push({ id: Date.now(), type:'lend', amt, date: document.getElementById('f-ldate').value, note: document.getElementById('f-lnote').value.trim() });
-  save(); closeOv('ov-lend'); renderAll();
+  db.people.find(x=>x.id===cur).tx.push({
+    id: Date.now(), type:'lend', amt,
+    date: document.getElementById('f-ldate').value,
+    note: document.getElementById('f-lnote').value.trim()
+  });
+  save(); closeSheet('sh-lend'); renderDetail(); renderHome();
   toast('Prêt de ' + fmt(amt) + ' enregistré');
 }
 
-// ============ ADD REPAY ============
+// REPAY
 function openRepay() {
-  document.getElementById('f-ramount').value = '';
+  document.getElementById('f-ramt').value = '';
   document.getElementById('f-rdate').value = today();
   document.getElementById('f-rnote').value = '';
-  document.getElementById('ov-repay').classList.add('open');
-  setTimeout(()=>document.getElementById('f-ramount').focus(),80);
+  document.getElementById('sh-repay').classList.add('open');
+  setTimeout(()=>document.getElementById('f-ramt').focus(), 300);
 }
 function saveRepay() {
-  const amt = parseFloat(document.getElementById('f-ramount').value);
+  const amt = parseFloat(document.getElementById('f-ramt').value);
   if (!amt || amt<=0) return;
-  const p = db.people.find(x=>x.id===cur);
-  p.tx.push({ id: Date.now(), type:'repay', amt, date: document.getElementById('f-rdate').value, note: document.getElementById('f-rnote').value.trim() });
-  save(); closeOv('ov-repay'); renderAll();
+  db.people.find(x=>x.id===cur).tx.push({
+    id: Date.now(), type:'repay', amt,
+    date: document.getElementById('f-rdate').value,
+    note: document.getElementById('f-rnote').value.trim()
+  });
+  save(); closeSheet('sh-repay'); renderDetail(); renderHome();
   toast(fmt(amt) + ' de remboursement enregistré');
 }
 
-// ============ DELETE TX ============
+// DELETE TX
 function askDelTx(txId) {
   pendingAction = { type:'tx', txId };
   document.getElementById('conf-ico').textContent = '🗑️';
-  document.getElementById('conf-title').textContent = 'Supprimer cette transaction ?';
-  document.getElementById('conf-sub').textContent = 'Cette action est irréversible.';
-  document.getElementById('ov-confirm').classList.add('open');
+  document.getElementById('conf-title').textContent = 'Supprimer ?';
+  document.getElementById('conf-sub').textContent = 'Cette transaction sera supprimée définitivement.';
+  document.getElementById('sh-confirm').classList.add('open');
 }
 
-// ============ DELETE PERSON ============
+// DELETE PERSON
 function askDelPerson() {
-  const p = db.people.find(x=>x.id===cur);
   pendingAction = { type:'person' };
+  const p = db.people.find(x=>x.id===cur);
   document.getElementById('conf-ico').textContent = '👤';
   document.getElementById('conf-title').textContent = 'Supprimer ' + p.name + ' ?';
   document.getElementById('conf-sub').textContent = 'Toutes les transactions seront supprimées.';
-  document.getElementById('ov-confirm').classList.add('open');
+  document.getElementById('sh-confirm').classList.add('open');
 }
 
 function doConfirm() {
   if (!pendingAction) return;
   if (pendingAction.type === 'tx') {
-    const p = db.people.find(x=>x.id===cur);
-    p.tx = p.tx.filter(t=>t.id!==pendingAction.txId);
-    save(); closeOv('ov-confirm'); renderAll();
+    db.people.find(x=>x.id===cur).tx = db.people.find(x=>x.id===cur).tx.filter(t=>t.id!==pendingAction.txId);
+    save(); closeSheet('sh-confirm'); renderDetail(); renderHome();
     toast('Transaction supprimée');
   } else {
     db.people = db.people.filter(x=>x.id!==cur);
-    save(); closeOv('ov-confirm');
-    cur = null;
-    document.getElementById('empty').style.display = 'flex';
-    document.getElementById('detail').style.display = 'none';
-    renderSidebar();
+    save(); closeSheet('sh-confirm');
     toast('Personne supprimée');
+    goHome();
   }
   pendingAction = null;
 }
 
-// ============ SELECT ============
-function selectPerson(id) {
-  cur = id;
-  document.getElementById('empty').style.display = 'none';
-  document.getElementById('detail').style.display = 'block';
-  renderSidebar();
-  renderDetail();
-}
-
-// ============ RENDER SIDEBAR ============
-function renderSidebar() {
-  // grand total
+// RENDER HOME
+function renderHome() {
   const total = db.people.reduce((s,p)=>s+bal(p).rem, 0);
   const active = db.people.filter(p=>bal(p).rem>0).length;
   document.getElementById('grand-total').textContent = fmt(total);
   document.getElementById('grand-sub').textContent = active + ' personne' + (active!==1?'s':'') + ' active' + (active!==1?'s':'');
 
-  const list = document.getElementById('sb-list');
+  const list = document.getElementById('people-list');
+  const secTitle = document.getElementById('sec-title');
+
   if (!db.people.length) {
-    list.innerHTML = '<div style="text-align:center;padding:2rem 1rem;font-size:12px;color:#3A3530;">Aucune personne</div>';
+    secTitle.style.display = 'none';
+    list.innerHTML = `<div class="empty-state">
+      <span class="empty-ico">💸</span>
+      <div class="empty-title">Personne à suivre</div>
+      <div class="empty-sub">Appuie sur + pour ajouter<br>quelqu'un qui te doit de l'argent.</div>
+    </div>`;
     return;
   }
-  list.innerHTML = db.people.map(p => {
+
+  secTitle.style.display = 'block';
+  const sorted = [...db.people].sort((a,b) => bal(b).rem - bal(a).rem);
+  list.innerHTML = sorted.map(p => {
     const b = bal(p);
-    const [bg, fg] = pal(p.name);
+    const [bg,fg] = pal(p.name);
     const clear = b.rem <= 0;
-    return `<div class="sb-item${p.id===cur?' active':''}" onclick="selectPerson(${p.id})">
+    return `<div class="person-card" onclick="goDetail(${p.id})">
       <div class="av" style="background:${bg};color:${fg}">${inits(p.name)}</div>
-      <div style="flex:1;overflow:hidden">
-        <div class="sb-name">${p.name}</div>
-        <div class="sb-bal ${clear?'clear':'owed'}">${clear ? 'Soldé ✓' : fmt(b.rem) + ' restant'}</div>
+      <div class="pc-info">
+        <div class="pc-name">${p.name}</div>
+        <div class="pc-bal ${clear?'clear':'owed'}">${clear ? 'Tout remboursé ✓' : 'Doit encore ' + fmt(b.rem)}</div>
       </div>
-      <div class="sb-dot ${clear?'clear':'owed'}"></div>
+      <div class="pc-right">
+        <div class="pc-amt ${clear?'clear':''}">${clear ? '✓' : fmt(b.rem)}</div>
+      </div>
+      <span class="chevron">›</span>
     </div>`;
   }).join('');
 }
 
-// ============ RENDER DETAIL ============
+// RENDER DETAIL
 function renderDetail() {
   if (!cur) return;
   const p = db.people.find(x=>x.id===cur);
   if (!p) return;
   const b = bal(p);
-  const [bg, fg] = pal(p.name);
-  const pct = b.lent > 0 ? Math.min(100, Math.round(b.repaid/b.lent*100)) : 0;
+  const [bg,fg] = pal(p.name);
+  const pct = b.lent>0 ? Math.min(100,Math.round(b.repaid/b.lent*100)) : 0;
 
-  // header
+  document.getElementById('d-topbar-name').textContent = p.name;
   document.getElementById('d-av').textContent = inits(p.name);
   document.getElementById('d-av').style.background = bg;
   document.getElementById('d-av').style.color = fg;
   document.getElementById('d-name').textContent = p.name;
-  document.getElementById('d-since').textContent = 'Ajouté le ' + fmtD(p.created);
+  document.getElementById('d-since').textContent = 'Depuis le ' + fmtD(p.created);
 
-  // stats
   document.getElementById('s-lent').textContent = fmt(b.lent);
   document.getElementById('s-repaid').textContent = fmt(b.repaid);
-  document.getElementById('s-remaining').textContent = fmt(b.rem);
+  document.getElementById('s-rem').textContent = fmt(b.rem);
 
-  // progress
   if (b.lent > 0) {
-    document.getElementById('d-progress').style.display = 'block';
+    document.getElementById('prog-wrap').style.display = 'block';
     document.getElementById('prog-pct').textContent = pct + '%';
     document.getElementById('prog-fill').style.width = pct + '%';
   } else {
-    document.getElementById('d-progress').style.display = 'none';
+    document.getElementById('prog-wrap').style.display = 'none';
   }
 
-  // cleared
   document.getElementById('cleared-banner').style.display = (b.rem<=0 && b.lent>0) ? 'flex' : 'none';
 
-  // transactions
   const txs = [...p.tx].sort((a,z)=>z.id-a.id);
   const lends = txs.filter(t=>t.type==='lend');
   const repays = txs.filter(t=>t.type==='repay');
 
-  const txHTML = (list, type) => {
-    if (!list.length) return `<div class="no-tx">Aucune transaction</div>`;
-    return list.map(t => `
-      <div class="tx">
+  const txHTML = (list, type) => !list.length
+    ? `<div class="no-tx">Aucune transaction</div>`
+    : list.map(t => `<div class="tx">
         <div class="tx-ico ${type}">${type==='lend'?'💸':'💰'}</div>
         <div class="tx-info">
-          <div class="tx-note">${t.note || (type==='lend'?'Prêt':'Remboursement')}</div>
+          <div class="tx-note">${t.note||(type==='lend'?'Prêt':'Remboursement')}</div>
           ${t.date?`<div class="tx-date">${fmtD(t.date)}</div>`:''}
         </div>
         <div class="tx-amt ${type}">${fmt(t.amt)}</div>
         <button class="tx-del" onclick="askDelTx(${t.id})">✕</button>
       </div>`).join('');
-  };
 
-  document.getElementById('list-lend').innerHTML = txHTML(lends, 'lend');
-  document.getElementById('list-repay').innerHTML = txHTML(repays, 'repay');
+  document.getElementById('list-lend').innerHTML = txHTML(lends,'lend');
+  document.getElementById('list-repay').innerHTML = txHTML(repays,'repay');
 }
 
-function renderAll() { renderSidebar(); renderDetail(); }
-
-// ============ INIT ============
-renderSidebar();
-if (db.people.length > 0) selectPerson(db.people[0].id);
+// INIT
+renderHome();
 </script>
 </body>
 </html>
