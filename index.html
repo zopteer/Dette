@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes Dettes</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Instrument Sans', sans-serif;
+  background: #0F0E0D;
+  color: #F5F0E8;
+  min-height: 100vh;
+}
+
+/* ===== APP SHELL ===== */
+#app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* ===== SIDEBAR ===== */
+#sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: #181714;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sb-top {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.logo span { color: #E8A040; }
+
+.total-box {
+  background: rgba(232,160,64,0.1);
+  border: 1px solid rgba(232,160,64,0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.total-lbl { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #E8A040; margin-bottom: 4px; }
+.total-val { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; }
+.total-sub { font-size: 11px; color: #7A7570; margin-top: 3px; }
+
+.btn-new {
+  width: 100%;
+  background: #E8A040;
+  color: #0F0E0D;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s;
+}
+.btn-new:hover { background: #C87820; }
+
+.sb-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+.sb-list::-webkit-scrollbar { width: 3px; }
+.sb-list::-webkit-scrollbar-thumb { background: #2A2723; border-radius: 2px; }
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s;
+  margin-bottom: 2px;
+}
+.sb-item:hover { background: #211F1C; }
+.sb-item.active { background: #2A2723; }
+
+.av {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.sb-name { font-size: 13px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-bal { font-size: 11px; }
+.sb-bal.owed { color: #E8A040; }
+.sb-bal.clear { color: #4CAF82; }
+.sb-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.sb-dot.owed { background: #E8A040; }
+.sb-dot.clear { background: #4CAF82; }
+
+/* ===== MAIN PANEL ===== */
+#main {
+  flex: 1;
+  overflow-y: auto;
+  background: #0F0E0D;
+}
+
+/* EMPTY */
+#empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 100vh;
+  color: #3A3530;
+  text-align: center;
+  padding: 2rem;
+}
+#empty .e-ico { font-size: 52px; margin-bottom: 16px; }
+#empty .e-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: #5A5550; margin-bottom: 8px; }
+#empty .e-sub { font-size: 13px; color: #3A3530; }
+
+/* DETAIL */
+#detail { display: none; }
+
+.d-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  position: sticky;
+  top: 0;
+  background: #0F0E0D;
+  z-index: 10;
+}
+
+.d-av {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 17px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.d-name { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+.d-since { font-size: 11px; color: #5A5550; margin-top: 2px; }
+.d-del {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 7px;
+  padding: 7px 13px;
+  font-size: 12px;
+  color: #7A7570;
+  cursor: pointer;
+  transition: all .15s;
+}
+.d-del:hover { background: rgba(224,85,85,0.12); color: #E05555; border-color: #E05555; }
+
+/* STATS */
+.d-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.d-stat {
+  padding: 18px 28px;
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+.d-stat:last-child { border-right: none; }
+.d-stat-lbl { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #5A5550; margin-bottom: 6px; }
+.d-stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; }
+.d-stat-val.lent { color: #F5F0E8; }
+.d-stat-val.repaid { color: #4CAF82; }
+.d-stat-val.remaining { color: #E8A040; }
+
+/* PROGRESS */
+.d-progress {
+  padding: 16px 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.d-prog-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.d-prog-lbl { font-size: 11px; color: #5A5550; }
+.d-prog-pct { font-size: 11px; font-weight: 600; color: #4CAF82; }
+.d-prog-bar { height: 5px; background: #2A2723; border-radius: 100px; overflow: hidden; }
+.d-prog-fill { height: 100%; background: linear-gradient(90deg, #4CAF82, #7AE0A8); border-radius: 100px; transition: width .5s; }
+
+/* BODY */
+.d-body { padding: 20px 28px 40px; }
+
+/* ACTION BUTTONS */
+.d-actions { display: flex; gap: 10px; margin-bottom: 24px; }
+.btn-lend {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(232,160,64,0.12);
+  border: 1px solid rgba(232,160,64,0.25);
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: #E8A040;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-lend:hover { background: #E8A040; color: #0F0E0D; }
+
+.btn-repay {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(76,175,130,0.1);
+  border: 1px solid rgba(76,175,130,0.25);
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: #4CAF82;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-repay:hover { background: #4CAF82; color: #0F0E0D; }
+
+/* CLEARED */
+.cleared {
+  background: rgba(76,175,130,0.1);
+  border: 1px solid rgba(76,175,130,0.2);
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 500; color: #4CAF82;
+  margin-bottom: 20px;
+}
+
+/* SECTION */
+.d-section { margin-bottom: 24px; }
+.d-sec-title {
+  font-size: 10px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: #5A5550;
+  margin-bottom: 10px;
+}
+
+/* TX */
+.tx {
+  display: flex; align-items: center; gap: 12px;
+  background: #181714;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  transition: background .15s;
+}
+.tx:hover { background: #1E1C19; }
+
+.tx-ico {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.tx-ico.lend { background: rgba(232,160,64,0.12); }
+.tx-ico.repay { background: rgba(76,175,130,0.12); }
+
+.tx-info { flex: 1; }
+.tx-note { font-size: 13px; color: #F5F0E8; }
+.tx-date { font-size: 11px; color: #5A5550; margin-top: 2px; }
+
+.tx-amt { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; white-space: nowrap; }
+.tx-amt.lend { color: #E8A040; }
+.tx-amt.lend::before { content: '+ '; }
+.tx-amt.repay { color: #4CAF82; }
+.tx-amt.repay::before { content: '− '; }
+
+.tx-del {
+  background: transparent; border: none;
+  color: #3A3530; font-size: 13px; cursor: pointer;
+  padding: 4px 6px; border-radius: 5px;
+  transition: all .15s;
+}
+.tx-del:hover { color: #E05555; background: rgba(224,85,85,0.12); }
+
+.no-tx { font-size: 12px; color: #3A3530; padding: 8px 0; }
+
+/* ===== MODALS ===== */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+.overlay.open { display: flex; }
+
+.modal {
+  background: #1E1C19;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+}
+.modal-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 18px; }
+
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #5A5550; margin-bottom: 6px; }
+.field input, .field textarea {
+  width: 100%;
+  background: #0F0E0D;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  color: #F5F0E8;
+  outline: none;
+}
+.field input:focus, .field textarea:focus {
+  border-color: #E8A040;
+  box-shadow: 0 0 0 3px rgba(232,160,64,0.12);
+}
+.field textarea { resize: vertical; min-height: 65px; }
+
+.m-actions { display: flex; gap: 10px; margin-top: 18px; }
+.m-cancel {
+  background: transparent; border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px; padding: 11px 20px;
+  font-size: 13px; color: #7A7570; cursor: pointer;
+}
+.m-cancel:hover { background: #2A2723; }
+.m-save {
+  flex: 1; border: none; border-radius: 100px; padding: 11px;
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: filter .2s;
+}
+.m-save:hover { filter: brightness(.9); }
+.m-save.gold { background: #E8A040; color: #0F0E0D; }
+.m-save.green { background: #4CAF82; color: #0F0E0D; }
+
+/* Confirm */
+.confirm-box {
+  background: #1E1C19;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 28px 24px;
+  width: 100%; max-width: 320px;
+  text-align: center;
+}
+.confirm-ico { font-size: 36px; display: block; margin-bottom: 12px; }
+.confirm-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.confirm-sub { font-size: 13px; color: #7A7570; margin-bottom: 20px; }
+.confirm-acts { display: flex; gap: 10px; }
+.m-del { flex: 1; background: #E05555; color: #fff; border: none; border-radius: 100px; padding: 11px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+
+/* Toast */
+#toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(10px);
+  background: #2A2723; border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px; padding: 9px 18px;
+  font-size: 13px; color: #F5F0E8;
+  opacity: 0; transition: all .3s; z-index: 9999; white-space: nowrap;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sb-top">
+      <div class="logo">mes <span>dettes</span></div>
+      <div class="total-box">
+        <div class="total-lbl">Total restant dû</div>
+        <div class="total-val" id="grand-total">0,00 €</div>
+        <div class="total-sub" id="grand-sub">0 personne active</div>
+      </div>
+      <button class="btn-new" onclick="openAddPerson()">+ Nouvelle personne</button>
+    </div>
+    <div class="sb-list" id="sb-list">
+      <div style="text-align:center;padding:2rem 1rem;font-size:12px;color:#3A3530;">Aucune personne</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+
+    <!-- EMPTY STATE -->
+    <div id="empty">
+      <div class="e-ico">💸</div>
+      <div class="e-title">Aucune personne sélectionnée</div>
+      <div class="e-sub">Crée une personne dans la barre de gauche<br>pour commencer à suivre ses remboursements.</div>
+    </div>
+
+    <!-- DETAIL -->
+    <div id="detail">
+      <div class="d-header">
+        <div class="d-av" id="d-av"></div>
+        <div>
+          <div class="d-name" id="d-name"></div>
+          <div class="d-since" id="d-since"></div>
+        </div>
+        <button class="d-del" onclick="askDelPerson()">Supprimer</button>
+      </div>
+
+      <div class="d-stats">
+        <div class="d-stat">
+          <div class="d-stat-lbl">Total prêté</div>
+          <div class="d-stat-val lent" id="s-lent">0,00 €</div>
+        </div>
+        <div class="d-stat">
+          <div class="d-stat-lbl">Remboursé</div>
+          <div class="d-stat-val repaid" id="s-repaid">0,00 €</div>
+        </div>
+        <div class="d-stat">
+          <div class="d-stat-lbl">Restant dû</div>
+          <div class="d-stat-val remaining" id="s-remaining">0,00 €</div>
+        </div>
+      </div>
+
+      <div class="d-progress" id="d-progress" style="display:none">
+        <div class="d-prog-top">
+          <span class="d-prog-lbl">Progression du remboursement</span>
+          <span class="d-prog-pct" id="prog-pct">0%</span>
+        </div>
+        <div class="d-prog-bar"><div class="d-prog-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+
+      <div class="d-body">
+        <div id="cleared-banner" style="display:none" class="cleared">
+          <span style="font-size:20px">🎉</span> Tout est remboursé !
+        </div>
+
+        <div class="d-actions">
+          <button class="btn-lend" onclick="openLend()">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Ajouter un prêt
+          </button>
+          <button class="btn-repay" onclick="openRepay()">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Remboursement reçu
+          </button>
+        </div>
+
+        <div class="d-section">
+          <div class="d-sec-title">Prêts</div>
+          <div id="list-lend"></div>
+        </div>
+        <div class="d-section">
+          <div class="d-sec-title">Remboursements</div>
+          <div id="list-repay"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: Nouvelle personne -->
+<div class="overlay" id="ov-person">
+  <div class="modal">
+    <div class="modal-title">Nouvelle personne</div>
+    <div class="field"><label>Prénom / Nom *</label><input id="f-pname" type="text" placeholder="Ex: Thomas Dupont"></div>
+    <div class="m-actions">
+      <button class="m-cancel" onclick="closeOv('ov-person')">Annuler</button>
+      <button class="m-save gold" onclick="savePerson()">Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Prêt -->
+<div class="overlay" id="ov-lend">
+  <div class="modal">
+    <div class="modal-title">Ajouter un prêt</div>
+    <div class="field"><label>Montant (€) *</label><input id="f-lamount" type="number" placeholder="50" min="0.01" step="0.01"></div>
+    <div class="field"><label>Date</label><input id="f-ldate" type="date"></div>
+    <div class="field"><label>Description (optionnel)</label><textarea id="f-lnote" placeholder="Dîner, billet, avance…"></textarea></div>
+    <div class="m-actions">
+      <button class="m-cancel" onclick="closeOv('ov-lend')">Annuler</button>
+      <button class="m-save gold" onclick="saveLend()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Remboursement -->
+<div class="overlay" id="ov-repay">
+  <div class="modal">
+    <div class="modal-title">Remboursement reçu</div>
+    <div class="field"><label>Montant (€) *</label><input id="f-ramount" type="number" placeholder="20" min="0.01" step="0.01"></div>
+    <div class="field"><label>Date</label><input id="f-rdate" type="date"></div>
+    <div class="field"><label>Description (optionnel)</label><textarea id="f-rnote" placeholder="Virement, liquide…"></textarea></div>
+    <div class="m-actions">
+      <button class="m-cancel" onclick="closeOv('ov-repay')">Annuler</button>
+      <button class="m-save green" onclick="saveRepay()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Confirmer suppression -->
+<div class="overlay" id="ov-confirm">
+  <div class="confirm-box">
+    <span class="confirm-ico" id="conf-ico">⚠️</span>
+    <div class="confirm-title" id="conf-title">Confirmer ?</div>
+    <div class="confirm-sub" id="conf-sub"></div>
+    <div class="confirm-acts">
+      <button class="m-cancel" onclick="closeOv('ov-confirm')">Annuler</button>
+      <button class="m-del" onclick="doConfirm()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ============ DATA ============
+let db = JSON.parse(localStorage.getItem('md3') || '{"people":[]}');
+let cur = null; // current person id
+let pendingAction = null;
+
+const save = () => localStorage.setItem('md3', JSON.stringify(db));
+const today = () => new Date().toISOString().slice(0,10);
+const inits = n => n.trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
+const fmt = n => n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const fmtD = d => { if(!d) return ''; const [y,m,j]=d.split('-'); return `${j}/${m}/${y}`; };
+
+const PALS = [
+  ['#3A2E1A','#E8A040'],['#1A2E2A','#4CAF82'],['#2E1A2E','#C87AD0'],
+  ['#1A1E2E','#6A8AE0'],['#2A1A1A','#E07040'],['#1A2A2E','#40C8C0']
+];
+const pal = name => { let h=0; for(let c of name) h=(h*31+c.charCodeAt(0))&0xffff; return PALS[h%PALS.length]; };
+
+const bal = p => {
+  const lent = p.tx.filter(t=>t.type==='lend').reduce((s,t)=>s+t.amt,0);
+  const repaid = p.tx.filter(t=>t.type==='repay').reduce((s,t)=>s+t.amt,0);
+  return { lent, repaid, rem: Math.max(0, lent-repaid) };
+};
+
+// ============ TOAST ============
+const toast = msg => {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2500);
+};
+
+// ============ OVERLAYS ============
+const closeOv = id => document.getElementById(id).classList.remove('open');
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
+
+// ============ ADD PERSON ============
+function openAddPerson() {
+  document.getElementById('f-pname').value = '';
+  document.getElementById('ov-person').classList.add('open');
+  setTimeout(()=>document.getElementById('f-pname').focus(),80);
+}
+function savePerson() {
+  const name = document.getElementById('f-pname').value.trim();
+  if (!name) return;
+  const p = { id: Date.now(), name, created: today(), tx: [] };
+  db.people.push(p);
+  save();
+  closeOv('ov-person');
+  renderSidebar();
+  selectPerson(p.id);
+  toast(name + ' ajouté·e !');
+}
+
+// ============ ADD LEND ============
+function openLend() {
+  document.getElementById('f-lamount').value = '';
+  document.getElementById('f-ldate').value = today();
+  document.getElementById('f-lnote').value = '';
+  document.getElementById('ov-lend').classList.add('open');
+  setTimeout(()=>document.getElementById('f-lamount').focus(),80);
+}
+function saveLend() {
+  const amt = parseFloat(document.getElementById('f-lamount').value);
+  if (!amt || amt<=0) return;
+  const p = db.people.find(x=>x.id===cur);
+  p.tx.push({ id: Date.now(), type:'lend', amt, date: document.getElementById('f-ldate').value, note: document.getElementById('f-lnote').value.trim() });
+  save(); closeOv('ov-lend'); renderAll();
+  toast('Prêt de ' + fmt(amt) + ' enregistré');
+}
+
+// ============ ADD REPAY ============
+function openRepay() {
+  document.getElementById('f-ramount').value = '';
+  document.getElementById('f-rdate').value = today();
+  document.getElementById('f-rnote').value = '';
+  document.getElementById('ov-repay').classList.add('open');
+  setTimeout(()=>document.getElementById('f-ramount').focus(),80);
+}
+function saveRepay() {
+  const amt = parseFloat(document.getElementById('f-ramount').value);
+  if (!amt || amt<=0) return;
+  const p = db.people.find(x=>x.id===cur);
+  p.tx.push({ id: Date.now(), type:'repay', amt, date: document.getElementById('f-rdate').value, note: document.getElementById('f-rnote').value.trim() });
+  save(); closeOv('ov-repay'); renderAll();
+  toast(fmt(amt) + ' de remboursement enregistré');
+}
+
+// ============ DELETE TX ============
+function askDelTx(txId) {
+  pendingAction = { type:'tx', txId };
+  document.getElementById('conf-ico').textContent = '🗑️';
+  document.getElementById('conf-title').textContent = 'Supprimer cette transaction ?';
+  document.getElementById('conf-sub').textContent = 'Cette action est irréversible.';
+  document.getElementById('ov-confirm').classList.add('open');
+}
+
+// ============ DELETE PERSON ============
+function askDelPerson() {
+  const p = db.people.find(x=>x.id===cur);
+  pendingAction = { type:'person' };
+  document.getElementById('conf-ico').textContent = '👤';
+  document.getElementById('conf-title').textContent = 'Supprimer ' + p.name + ' ?';
+  document.getElementById('conf-sub').textContent = 'Toutes les transactions seront supprimées.';
+  document.getElementById('ov-confirm').classList.add('open');
+}
+
+function doConfirm() {
+  if (!pendingAction) return;
+  if (pendingAction.type === 'tx') {
+    const p = db.people.find(x=>x.id===cur);
+    p.tx = p.tx.filter(t=>t.id!==pendingAction.txId);
+    save(); closeOv('ov-confirm'); renderAll();
+    toast('Transaction supprimée');
+  } else {
+    db.people = db.people.filter(x=>x.id!==cur);
+    save(); closeOv('ov-confirm');
+    cur = null;
+    document.getElementById('empty').style.display = 'flex';
+    document.getElementById('detail').style.display = 'none';
+    renderSidebar();
+    toast('Personne supprimée');
+  }
+  pendingAction = null;
+}
+
+// ============ SELECT ============
+function selectPerson(id) {
+  cur = id;
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('detail').style.display = 'block';
+  renderSidebar();
+  renderDetail();
+}
+
+// ============ RENDER SIDEBAR ============
+function renderSidebar() {
+  // grand total
+  const total = db.people.reduce((s,p)=>s+bal(p).rem, 0);
+  const active = db.people.filter(p=>bal(p).rem>0).length;
+  document.getElementById('grand-total').textContent = fmt(total);
+  document.getElementById('grand-sub').textContent = active + ' personne' + (active!==1?'s':'') + ' active' + (active!==1?'s':'');
+
+  const list = document.getElementById('sb-list');
+  if (!db.people.length) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem 1rem;font-size:12px;color:#3A3530;">Aucune personne</div>';
+    return;
+  }
+  list.innerHTML = db.people.map(p => {
+    const b = bal(p);
+    const [bg, fg] = pal(p.name);
+    const clear = b.rem <= 0;
+    return `<div class="sb-item${p.id===cur?' active':''}" onclick="selectPerson(${p.id})">
+      <div class="av" style="background:${bg};color:${fg}">${inits(p.name)}</div>
+      <div style="flex:1;overflow:hidden">
+        <div class="sb-name">${p.name}</div>
+        <div class="sb-bal ${clear?'clear':'owed'}">${clear ? 'Soldé ✓' : fmt(b.rem) + ' restant'}</div>
+      </div>
+      <div class="sb-dot ${clear?'clear':'owed'}"></div>
+    </div>`;
+  }).join('');
+}
+
+// ============ RENDER DETAIL ============
+function renderDetail() {
+  if (!cur) return;
+  const p = db.people.find(x=>x.id===cur);
+  if (!p) return;
+  const b = bal(p);
+  const [bg, fg] = pal(p.name);
+  const pct = b.lent > 0 ? Math.min(100, Math.round(b.repaid/b.lent*100)) : 0;
+
+  // header
+  document.getElementById('d-av').textContent = inits(p.name);
+  document.getElementById('d-av').style.background = bg;
+  document.getElementById('d-av').style.color = fg;
+  document.getElementById('d-name').textContent = p.name;
+  document.getElementById('d-since').textContent = 'Ajouté le ' + fmtD(p.created);
+
+  // stats
+  document.getElementById('s-lent').textContent = fmt(b.lent);
+  document.getElementById('s-repaid').textContent = fmt(b.repaid);
+  document.getElementById('s-remaining').textContent = fmt(b.rem);
+
+  // progress
+  if (b.lent > 0) {
+    document.getElementById('d-progress').style.display = 'block';
+    document.getElementById('prog-pct').textContent = pct + '%';
+    document.getElementById('prog-fill').style.width = pct + '%';
+  } else {
+    document.getElementById('d-progress').style.display = 'none';
+  }
+
+  // cleared
+  document.getElementById('cleared-banner').style.display = (b.rem<=0 && b.lent>0) ? 'flex' : 'none';
+
+  // transactions
+  const txs = [...p.tx].sort((a,z)=>z.id-a.id);
+  const lends = txs.filter(t=>t.type==='lend');
+  const repays = txs.filter(t=>t.type==='repay');
+
+  const txHTML = (list, type) => {
+    if (!list.length) return `<div class="no-tx">Aucune transaction</div>`;
+    return list.map(t => `
+      <div class="tx">
+        <div class="tx-ico ${type}">${type==='lend'?'💸':'💰'}</div>
+        <div class="tx-info">
+          <div class="tx-note">${t.note || (type==='lend'?'Prêt':'Remboursement')}</div>
+          ${t.date?`<div class="tx-date">${fmtD(t.date)}</div>`:''}
+        </div>
+        <div class="tx-amt ${type}">${fmt(t.amt)}</div>
+        <button class="tx-del" onclick="askDelTx(${t.id})">✕</button>
+      </div>`).join('');
+  };
+
+  document.getElementById('list-lend').innerHTML = txHTML(lends, 'lend');
+  document.getElementById('list-repay').innerHTML = txHTML(repays, 'repay');
+}
+
+function renderAll() { renderSidebar(); renderDetail(); }
+
+// ============ INIT ============
+renderSidebar();
+if (db.people.length > 0) selectPerson(db.people[0].id);
+</script>
+</body>
+</html>
