@@ -358,6 +358,7 @@ html, body {
 <div class="screen active" id="screen-home">
   <div class="topbar">
     <div class="topbar-title">mes <span>dettes</span></div>
+    <button class="icon-btn" onclick="openBackup()" aria-label="Sauvegarde">⇅</button>
   </div>
   <div class="scroll" id="home-scroll">
     <div class="home-banner">
@@ -479,6 +480,23 @@ html, body {
   </div>
 </div>
 
+<!-- SHEET: Sauvegarde -->
+<div class="sheet-overlay" id="sh-backup">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Sauvegarde</div>
+    <p style="color:var(--ink2);font-size:14px;line-height:1.5;margin-bottom:16px">Exporte tes données dans un fichier (iCloud Drive, Fichiers, mail, AirDrop…) pour les retrouver sur un autre téléphone.</p>
+    <div class="sheet-actions" style="margin-bottom:10px">
+      <button class="s-save gold" onclick="exportData()">Exporter</button>
+      <button class="s-cancel" onclick="document.getElementById('f-import').click()">Importer</button>
+    </div>
+    <input id="f-import" type="file" accept=".json,application/json,text/plain" style="display:none" onchange="importFile(this)">
+    <div class="sheet-actions">
+      <button class="s-cancel" onclick="closeSheet('sh-backup')">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -517,6 +535,42 @@ const closeSheet = id => document.getElementById(id).classList.remove('open');
 document.querySelectorAll('.sheet-overlay').forEach(o =>
   o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); })
 );
+
+
+// SAUVEGARDE
+function openBackup() { document.getElementById('sh-backup').classList.add('open'); }
+async function exportData() {
+  const txt = JSON.stringify({ app:'mes-dettes', v:4, date:new Date().toISOString(), data:db }, null, 2);
+  const name = 'mes-dettes-' + today() + '.json';
+  const file = new File([txt], name, { type:'application/json' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files:[file] })) {
+      await navigator.share({ files:[file], title:'Sauvegarde Mes Dettes' });
+      toast('Sauvegarde exportée'); return;
+    }
+  } catch(e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  toast('Fichier téléchargé');
+}
+function importFile(input) {
+  const f = input.files[0]; input.value = '';
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    let o;
+    try { o = JSON.parse(r.result); } catch(e) { toast('Fichier invalide'); return; }
+    const data = o && o.data ? o.data : o;
+    if (!data || !Array.isArray(data.people)) { toast('Fichier invalide'); return; }
+    const n = data.people.length;
+    if (!confirm('Remplacer tes données actuelles par cette sauvegarde (' + n + ' personne' + (n>1?'s':'') + ') ?')) return;
+    db = data; save(); closeSheet('sh-backup'); goHome(); renderHome();
+    toast('Données importées');
+  };
+  r.readAsText(f);
+}
 
 // SCREENS
 function goHome() {
